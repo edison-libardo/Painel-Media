@@ -1,0 +1,363 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libardo Transportes — Amostragem de Dados Operacionais</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="js/tailwind-config.js"></script>
+  <script src="js/file-protocol-guard.js" defer></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Roboto+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body data-page="sample" class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased flex flex-col">
+
+  <!-- Top Navigation Bar / App Shell -->
+  <header class="bg-primary text-on-primary sticky top-0 z-40 border-b border-secondary/40 shadow-sm">
+    <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
+      <!-- Brand & Title -->
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div class="flex items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-headline text-lg font-black tracking-wider text-white">LIBARDO</span>
+              <span class="text-[10px] uppercase font-bold tracking-widest bg-secondary px-1.5 py-0.5 rounded text-gray-200">Transportes</span>
+            </div>
+            <p class="text-[11px] text-gray-400 font-label tracking-tight">Gestão de Frotas &amp; Telemetria Integrada</p>
+          </div>
+        </div>
+
+        <nav aria-label="Navegação principal" class="flex flex-wrap items-center gap-1 pl-0 md:pl-4 border-l-0 md:border-l border-gray-700/60 text-sm">
+          <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-md bg-secondary text-white font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">table_chart</span>
+            <span data-design-text-token="label-md">Amostragem de Dados</span>
+          </a>
+          <a href="rankings.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">analytics</span>
+            <span data-design-text-token="label-md">Dashboards Top 10</span>
+          </a>
+          <a href="historico.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">history</span>
+            <span data-design-text-token="label-md">Histórico</span>
+          </a>
+          <a href="comparativo.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">compare_arrows</span>
+            <span data-design-text-token="label-md">Comparativo</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Quick Actions / Status -->
+      <div class="flex items-center gap-3">
+        <span id="autosave-status" class="max-w-40 text-right text-xs text-emerald-300" role="status" aria-live="polite">Salvamento local e compartilhado ativo.</span>
+        <button id="backup-now" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2B2F36] hover:bg-[#343842] text-white rounded-md text-xs font-label border border-gray-700 transition-colors" title="Baixar uma cópia local dos dados atuais">
+          <span class="material-symbols-outlined text-sm">download</span>
+          <span>Backup</span>
+        </button>
+        <button id="restore-backup" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2B2F36] hover:bg-[#343842] text-white rounded-md text-xs font-label border border-gray-700 transition-colors" title="Restaurar dados de um backup JSON">
+          <span class="material-symbols-outlined text-sm">restore</span>
+          <span>Restaurar</span>
+        </button>
+        <input id="restore-backup-file" type="file" accept=".json,application/json" hidden>
+        <button id="save-history" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-md text-xs font-label border border-emerald-600 transition-colors">
+          <span class="material-symbols-outlined text-sm">save</span>
+          <span>Salvar Histórico</span>
+        </button>
+        <div class="hidden lg:flex items-center gap-2 bg-[#26292E] px-3 py-1 rounded-md border border-gray-700/50 text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-gray-300 font-label">Telemetria Ativa</span>
+          <span class="text-gray-500">|</span>
+          <span data-fleet-count class="text-gray-400 font-code">Frota: 0 Veículos</span>
+        </div>
+
+        <button id="open-import" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded-md text-xs font-label border border-sky-600 transition-colors">
+          <span class="material-symbols-outlined text-sm">upload_file</span>
+          <span>Import</span>
+        </button>
+        <button id="reset-dashboard" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2B2F36] hover:bg-[#343842] text-white rounded-md text-xs font-label border border-gray-700 transition-colors">
+          <span class="material-symbols-outlined text-sm">restart_alt</span>
+          <span>Reset</span>
+        </button>
+        <button id="export-button" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2B2F36] hover:bg-[#343842] text-white rounded-md text-xs font-label border border-gray-700 transition-colors">
+          <span class="material-symbols-outlined text-sm">download</span>
+          <span>Exportar CSV</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Content -->
+  <main class="flex-1 p-6 max-w-[1720px] w-full mx-auto flex flex-col gap-6">
+
+    <!-- Page Header & Summary Badges -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-light-outline">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs uppercase font-bold tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">Base Operacional</span>
+          <span class="text-xs text-light-on-surface-variant font-medium">• Ciclo Mensal Corrente</span>
+        </div>
+        <h1 data-design-text-token="headline-lg" class="font-headline text-headline-lg text-primary tracking-tight mt-1">
+          Amostragem Geral de Condutores e Veículos
+        </h1>
+        <p data-design-text-token="body-md" class="text-body-md text-light-on-surface-variant">
+          Controle individual de abastecimento, médias de consumo comparativas com padrões de fábrica, telemetria de condução e premiações.
+        </p>
+      </div>
+
+      <!-- Quick KPI Strip -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">local_gas_station</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Diesel Médio Frota</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-success/10 text-success flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">savings</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Economia Gerada</p>
+            <p class="font-headline text-sm font-bold text-success font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-accent/10 text-accent flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">award_star</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Premiação Acumulada</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">route</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">KM Rodado Total</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-accent/10 text-accent flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">speed</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Média Real Total</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-accent/10 text-accent flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">local_gas_station</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Litragem Total</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-success/10 text-success flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">payments</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Valor Total R$</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+
+        <div class="bg-light-surface-container border border-light-outline rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div class="w-8 h-8 rounded bg-secondary/10 text-secondary flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">paid</span>
+          </div>
+          <div>
+            <p class="text-[11px] text-light-on-surface-variant font-label uppercase">Custo Total do KM Rodado</p>
+            <p class="font-headline text-sm font-bold text-primary font-code">—</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Bar / Control Strip -->
+    <div class="bg-light-surface-container border border-light-outline rounded-lg p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-3 flex-1">
+        <!-- Search -->
+        <div class="relative min-w-[260px] flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-gray-400 text-lg">search</span>
+          <input id="driver-search" type="search" aria-label="Buscar por motorista ou placa" placeholder="Buscar por motorista ou placa..." class="w-full pl-9 pr-3 py-1.5 text-sm bg-light-surface border border-light-outline rounded-md focus:ring-1 focus:ring-accent focus:border-accent text-light-on-surface placeholder:text-gray-400">
+        </div>
+
+        <!-- Vehicle Type Filter -->
+        <select id="vehicle-filter" aria-label="Filtrar por tipo de veículo" class="text-sm bg-light-surface border border-light-outline rounded-md py-1.5 px-3 text-light-on-surface focus:ring-1 focus:ring-accent">
+          <option value="">Todos os Tipos de Veículo</option>
+          <option value="ACELLO">ACELLO</option>
+          <option value="TRUCK">TRUCK</option>
+          <option value="BITRUCK">BITRUCK</option>
+          <option value="CARRETA">CARRETA</option>
+        </select>
+
+        <!-- Status Filter -->
+        <select id="average-filter" aria-label="Filtrar pelo desempenho de consumo" class="text-sm bg-light-surface border border-light-outline rounded-md py-1.5 px-3 text-light-on-surface focus:ring-1 focus:ring-accent">
+          <option value="">Status da Média</option>
+          <option value="acima">Acima da Média de Fábrica (Econômico)</option>
+          <option value="abaixo">Abaixo da Média de Fábrica (Desvio)</option>
+        </select>
+
+        <div class="relative">
+          <button id="advanced-filter-button" type="button" aria-expanded="false" aria-controls="advanced-filters" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-light-surface-variant hover:bg-gray-200 text-light-on-surface-variant text-xs font-label border border-light-outline transition-colors">
+            <span class="material-symbols-outlined text-sm">tune</span>
+            <span>Filtros Avançados</span>
+          </button>
+          <div id="advanced-filters" hidden class="absolute right-0 top-full z-30 mt-2 w-72 rounded-lg border border-light-outline bg-white p-4 shadow-xl">
+            <label for="minimum-score" class="block text-xs font-semibold text-slate-700">Nota mínima de telemetria</label>
+            <input id="minimum-score" type="number" min="0" max="100" step="0.1" placeholder="Ex.: 85" class="mt-1 w-full rounded-md border border-light-outline px-3 py-2 text-sm">
+            <label class="mt-3 flex items-center gap-2 text-xs text-slate-700">
+              <input id="awarded-only" type="checkbox" class="rounded border-light-outline text-accent focus:ring-accent">
+              Mostrar somente motoristas premiados
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 self-end md:self-auto text-xs text-light-on-surface-variant">
+        <label for="page-size" class="sr-only">Registros por página</label>
+        <select id="page-size" aria-label="Registros por página" class="page-size-select rounded border border-light-outline bg-white px-2 py-1.5">
+          <option value="5">5 por página</option>
+          <option value="10" selected>10 por página</option>
+          <option value="20">20 por página</option>
+          <option value="50">50 por página</option>
+        </select>
+        <span id="record-count" aria-live="polite">Exibindo 0 de 0 registros</span>
+        <button id="refresh-button" type="button" class="w-8 h-8 rounded border border-light-outline flex items-center justify-center hover:bg-light-surface-variant" title="Limpar filtros e reaplicar a amostra">
+          <span class="material-symbols-outlined text-base">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table Container -->
+    <div class="bg-light-surface-container rounded-lg border border-light-outline shadow-sm overflow-hidden flex flex-col">
+      <!-- Table Header Bar -->
+      <div class="px-5 py-3.5 bg-light-surface-variant/40 border-b border-light-outline flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-xl">dataset</span>
+          <div>
+            <h2 data-design-text-token="headline-sm" class="font-headline text-headline-sm text-primary">
+              Planilha Consolidada de Consumo e Telemetria
+            </h2>
+            <p class="mt-0.5 text-[11px] text-slate-500">Motoristas com mais de um registro são agrupados automaticamente; clique em + para ver os detalhes por placa. Células destacadas podem ser editadas.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 text-[11px] font-label px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Superávit Média Fábrica
+          </span>
+          <span class="inline-flex items-center gap-1 text-[11px] font-label px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> Desvio de Consumo
+          </span>
+        </div>
+      </div>
+
+      <!-- Responsive Scrollable Table -->
+      <div class="overflow-x-auto custom-scroll">
+        <table class="w-full text-left text-sm whitespace-nowrap divide-y divide-light-outline">
+          <thead class="bg-[#1C1E21] text-white font-label text-xs uppercase tracking-wider">
+            <tr>
+              <th scope="col" class="py-3.5 px-4 sticky left-0 z-20 bg-[#1C1E21] shadow-[2px_0_4px_rgba(0,0,0,0.15)]">Motorista</th>
+              <th scope="col" class="py-3.5 px-3.5">Placa</th>
+              <th scope="col" class="py-3.5 px-3.5">Tipo Veículo</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Litragem (L)</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Valor Total (R$)</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Km Rodado</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Média Fábrica</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Média Real</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Economia (L)</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Economia (R$)</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Vlr Médio Diesel</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Custo Km Rodado</th>
+              <th scope="col" class="py-3.5 px-3.5 text-center">Nota Telemetria</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Valor Prêmio Obtido</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Fx verde</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Nota fx</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Embalo</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Nota embalo</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">P. ligado</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Nota op. ligado</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">A. verde</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Nota a. verde</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Picos</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Nota picos</th>
+              <th scope="col" class="py-3.5 px-3.5">Tipo conjunto</th>
+              <th scope="col" class="py-3.5 px-3.5 text-right">Prêmio total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-light-outline font-body text-light-on-surface bg-white"></tbody>
+        </table>
+      </div>
+
+      <!-- Table Pagination & Footer Totals -->
+      <div class="px-5 py-3.5 bg-light-surface-variant/50 border-t border-light-outline flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+        <div id="pagination-summary" class="text-light-on-surface-variant" aria-live="polite">
+          Nenhum registro carregado
+        </div>
+        <nav id="pagination-controls" aria-label="Paginação" class="flex items-center gap-1.5"></nav>
+      </div>
+    </div>
+
+    <!-- Technical Explanatory Notes -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-light-on-surface-variant">
+      <div class="p-3.5 rounded-lg border border-light-outline bg-light-surface-container">
+        <h4 class="font-bold text-primary mb-1 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base text-accent">info</span> Média de Fábrica x Média Real
+        </h4>
+        <p>A meta é calculada dinamicamente com base no modelo do cavalo, perfil topográfico e PBT médio aferido nas viagens.</p>
+      </div>
+
+      <div class="p-3.5 rounded-lg border border-light-outline bg-light-surface-container">
+        <h4 class="font-bold text-primary mb-1 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base text-success">verified</span> Bonificação e Premiação
+        </h4>
+        <p>Elegibilidade à bonificação: nota de telemetria ≥ 70 e mais de 1.000 km rodados. Metas por tipo: Carreta 12.000 km, Bitruck 12.000 km, Truck 8.000 km e Acello 2.000 km.</p>
+      </div>
+
+      <div class="p-3.5 rounded-lg border border-light-outline bg-light-surface-container">
+        <h4 class="font-bold text-primary mb-1 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base text-warning">speed</span> Telemetria Libardo
+        </h4>
+        <p>A avaliação considera o início da faixa econômica, o embalo, o tempo parado com motor ligado, o tempo acima da faixa verde e os picos de velocidade.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="mt-auto border-t border-light-outline bg-white py-3 px-6 text-xs text-light-on-surface-variant flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-primary">Libardo Transportes</span>
+      <span>•</span>
+      <span>Sistema de Auditoria de Consumo e Telemetria Veicular</span>
+    </div>
+    <div class="font-code text-gray-500">
+      Atualizado: <time id="updated-at" datetime="2026-11-03T16:30">03/11/2026 às 16:30</time> | Versão 3.4.2
+    </div>
+  </footer>
+
+  <script src="js/components/table-sorting.js"></script>
+  <script src="js/components/operational-table.js"></script>
+  <script type="module" src="js/app-bootstrap.js"></script>
+</body></html>

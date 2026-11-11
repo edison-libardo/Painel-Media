@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar | Libardo Transportes</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased">
+  <main class="mx-auto flex min-h-screen max-w-md items-center px-5">
+    <section class="w-full rounded-xl border border-light-outline bg-white p-7 shadow-lg">
+      <p class="text-xs font-bold uppercase tracking-widest text-accent">Libardo Transportes</p>
+      <h1 class="mt-2 text-2xl font-bold text-primary">Acessar o painel</h1>
+      <p class="mt-2 text-sm text-light-on-surface-variant">Entre com o e-mail e a senha fornecidos pelo administrador.</p>
+      <form id="login-form" class="mt-6 space-y-4">
+        <label class="block text-sm font-semibold">E-mail
+          <input id="login-email" type="email" autocomplete="username" required class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
+        </label>
+        <label class="block text-sm font-semibold">Senha
+          <input id="login-password" type="password" autocomplete="current-password" required class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
+        </label>
+        <p id="login-error" class="text-sm text-rose-700" role="alert" hidden></p>
+        <button id="login-submit" type="submit" class="w-full rounded-md bg-primary px-4 py-2.5 font-semibold text-white hover:bg-slate-700">Entrar</button>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

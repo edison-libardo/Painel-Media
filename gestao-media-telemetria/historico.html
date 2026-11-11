@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libardo Transportes — Histórico Mensal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="js/tailwind-config.js"></script>
+  <script src="js/file-protocol-guard.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Roboto+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased flex flex-col">
+  <header class="bg-primary text-on-primary sticky top-0 z-40 border-b border-secondary/40 shadow-sm">
+    <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-headline text-lg font-black tracking-wider text-white">LIBARDO</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest bg-secondary px-1.5 py-0.5 rounded text-gray-200">Transportes</span>
+          </div>
+          <p class="text-[11px] text-gray-400 font-label tracking-tight">Gestão de Frotas &amp; Telemetria Integrada</p>
+        </div>
+        <nav aria-label="Navegação principal" class="flex flex-wrap items-center gap-1 pl-0 md:pl-4 border-l-0 md:border-l border-gray-700/60 text-sm">
+          <a href="index.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">table_chart</span>
+            <span>Amostragem de Dados</span>
+          </a>
+          <a href="rankings.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">analytics</span>
+            <span>Dashboards Top 10</span>
+          </a>
+          <a href="historico.html" aria-current="page" class="px-3 py-1.5 rounded-md bg-secondary text-white font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">history</span>
+            <span>Histórico</span>
+          </a>
+          <a href="comparativo.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">compare_arrows</span>
+            <span>Comparativo</span>
+          </a>
+        </nav>
+      </div>
+      <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-700 hover:bg-sky-600 text-white rounded-md text-xs font-label border border-sky-600 transition-colors">
+        <span class="material-symbols-outlined text-sm">arrow_back</span>
+        <span>Voltar ao painel</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 max-w-[1720px] w-full mx-auto flex flex-col gap-6">
+    <section class="pb-4 border-b border-light-outline">
+      <span class="text-xs uppercase font-bold tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">Arquivos mensais</span>
+      <h1 class="font-headline text-3xl font-bold text-primary tracking-tight mt-2">Histórico do painel</h1>
+      <p class="mt-2 text-sm text-light-on-surface-variant">Salve os dados do mês quando quiser e consulte snapshots sem alterar a base operacional atual. Os históricos ficam armazenados neste navegador.</p>
+    </section>
+
+    <p id="history-status" class="text-sm" role="status" aria-live="polite" hidden></p>
+    <section id="history-list" aria-label="Históricos salvos" class="flex flex-col gap-3"></section>
+  </main>
+
+  <dialog id="rename-dialog" class="w-[min(94vw,480px)] rounded-xl border border-light-outline p-0 shadow-2xl backdrop:bg-slate-950/50">
+    <form id="rename-form" class="p-6">
+      <h2 class="text-lg font-bold text-primary">Renomear histórico</h2>
+      <label for="history-name" class="mt-4 block text-sm font-semibold text-slate-800">Nome do arquivo</label>
+      <input id="history-name" name="name" required maxlength="100" class="mt-2 w-full rounded-md border border-light-outline bg-white px-3 py-2 text-sm" autocomplete="off">
+      <p id="rename-error" class="mt-2 text-sm text-rose-700" role="alert" hidden></p>
+      <div class="mt-5 flex justify-end gap-2">
+        <button id="cancel-rename" type="button" class="rounded-md border border-light-outline px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancelar</button>
+        <button type="submit" class="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Salvar nome</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="mt-auto border-t border-light-outline bg-white py-3 px-6 text-xs text-light-on-surface-variant flex items-center justify-between">
+    <span class="font-bold text-primary">Libardo Transportes</span>
+    <span>Históricos salvos localmente neste navegador</span>
+  </footer>
+  <script type="module" src="js/app-bootstrap.js"></script>
+</body>
+</html>

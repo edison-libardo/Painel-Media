@@ -1,0 +1,106 @@
+body[data-page="sample"] .custom-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+body[data-page="sample"] tr.driver-group-detail td:first-child {
+  padding-left: 2rem;
+}
+
+body[data-page="sample"] tr.driver-group-summary td:first-child {
+  border-left: 3px solid #0369a1;
+}
+
+body[data-page="sample"] #page-size,
+body[data-page="sample"] #vehicle-filter,
+body[data-page="sample"] #average-filter {
+  background-image: none;
+  padding-right: 0.75rem;
+}
+
+body[data-page="sample"] main table th:nth-child(n+15):nth-child(-n+25),
+body[data-page="sample"] main table td:nth-child(n+15):nth-child(-n+25) {
+  display: none;
+}
+
+body[data-page="rankings"] .custom-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+thead th[aria-sort="ascending"]::after {
+  content: " ▲";
+}
+
+thead th[aria-sort="descending"]::after {
+  content: " ▼";
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+dialog#import-dialog #import-form .import-submit-button {
+  border: 1px solid #0369a1;
+  background-color: #0369a1;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+dialog#import-dialog #import-form .import-submit-button:hover:not(:disabled) {
+  border-color: #0284c7;
+  background-color: #0284c7;
+}
+
+dialog#import-dialog #import-form .import-submit-button:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+dialog#import-dialog #import-form .import-submit-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+body[data-page="sample"] .custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@media print {
+  body {
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  header {
+    position: static !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  #ranking-grid {
+    display: block !important;
+  }
+
+  #ranking-grid > section {
+    break-inside: avoid;
+    margin: 0 0 16px;
+  }
+
+  #ranking-grid > section[hidden] {
+    display: none !important;
+  }
+}

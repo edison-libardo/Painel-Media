@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libardo Transportes — Painel</title>
+  <script>
+    if (window.location.protocol === "file:") {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.innerHTML = `
+          <main style="max-width:640px;margin:12vh auto;padding:24px;font:16px/1.6 Arial,sans-serif;color:#172033">
+            <h1>Abra o painel pelo iniciador</h1>
+            <p>O navegador não executa os módulos do painel quando o HTML é aberto diretamente pelo ícone antigo.</p>
+            <p>Execute <strong>Abrir Painel.bat</strong> na pasta do projeto. Ele inicia o servidor local e abre o painel no navegador.</p>
+          </main>`;
+      });
+    } else {
+      window.location.replace("gestao-media-telemetria/index.html");
+    }
+  </script>
+</head>
+<body>
+  <p>Abrindo o painel Libardo Transportes…</p>
+</body>
+</html>

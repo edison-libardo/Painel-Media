@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar acessos | Libardo Transportes</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+</head>
+<body class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased flex flex-col">
+  <header class="bg-primary text-on-primary sticky top-0 z-40 border-b border-secondary/40 shadow-sm">
+    <div class="px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <a href="index.html" class="font-bold text-white">LIBARDO Transportes</a>
+      <nav aria-label="Navega&#231;&#227;o principal" class="flex items-center gap-2"></nav>
+    </div>
+  </header>
+  <main class="mx-auto w-full max-w-2xl flex-1 p-6">
+    <h1 class="text-2xl font-bold text-primary">Gerenciar acessos</h1>
+    <p class="mt-2 text-sm text-light-on-surface-variant">Crie contas para pessoas autorizadas. As senhas não são armazenadas no painel.</p>
+    <form id="create-user-form" class="mt-6 space-y-4 rounded-xl border border-light-outline bg-white p-5 shadow-sm">
+      <label class="block text-sm font-semibold">E-mail
+        <input id="new-user-email" type="email" required autocomplete="off" class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
+      </label>
+      <label class="block text-sm font-semibold">Senha inicial
+        <input id="new-user-password" type="password" minlength="8" required autocomplete="new-password" class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
+      </label>
+      <label class="block text-sm font-semibold">Categoria
+        <select id="new-user-role" class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
+          <option value="consultor">Consultor — somente leitura</option>
+          <option value="adm">Administrador</option>
+        </select>
+      </label>
+      <p id="create-user-status" role="status" aria-live="polite" class="text-sm" hidden></p>
+      <button id="create-user-submit" type="submit" class="rounded-md bg-primary px-4 py-2 font-semibold text-white hover:bg-slate-700">Criar acesso</button>
+    </form>
+  </main>
+  <script type="module" src="js/app-bootstrap.js"></script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libardo Transportes — Comparativo Mensal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="js/tailwind-config.js"></script>
+  <script src="js/file-protocol-guard.js" defer></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Roboto+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased flex flex-col">
+  <header class="bg-primary text-on-primary sticky top-0 z-40 border-b border-secondary/40 shadow-sm">
+    <div class="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-headline text-lg font-black tracking-wider text-white">LIBARDO</span>
+            <span class="text-[10px] uppercase font-bold tracking-widest bg-secondary px-1.5 py-0.5 rounded text-gray-200">Transportes</span>
+          </div>
+          <p class="text-[11px] text-gray-400 font-label tracking-tight">Gestão de Frotas &amp; Telemetria Integrada</p>
+        </div>
+        <nav aria-label="Navegação principal" class="flex flex-wrap items-center gap-1 pl-0 md:pl-4 border-l-0 md:border-l border-gray-700/60 text-sm">
+          <a href="index.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">table_chart</span>
+            <span>Amostragem de Dados</span>
+          </a>
+          <a href="rankings.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">analytics</span>
+            <span>Dashboards Top 10</span>
+          </a>
+          <a href="historico.html" class="px-3 py-1.5 rounded-md text-gray-300 hover:text-white hover:bg-secondary/40 font-medium flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-base">history</span>
+            <span>Histórico</span>
+          </a>
+          <a href="comparativo.html" aria-current="page" class="px-3 py-1.5 rounded-md bg-secondary text-white font-medium flex items-center gap-2">
+            <span class="material-symbols-outlined text-base">compare_arrows</span>
+            <span>Comparativo</span>
+          </a>
+        </nav>
+      </div>
+      <a href="historico.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2B2F36] hover:bg-[#343842] text-white rounded-md text-xs font-label border border-gray-700 transition-colors">
+        <span class="material-symbols-outlined text-sm">history</span>
+        <span>Históricos salvos</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 p-6 max-w-[1720px] w-full mx-auto flex flex-col gap-6">
+    <section class="pb-4 border-b border-light-outline">
+      <span class="text-xs uppercase font-bold tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">Análise mensal</span>
+      <h1 class="font-headline text-3xl font-bold text-primary tracking-tight mt-2">Comparativo entre períodos</h1>
+      <p class="mt-2 text-sm text-light-on-surface-variant">Selecione dois históricos salvos. O período mais antigo fica à esquerda e o mais recente à direita, como referência para a comparação.</p>
+    </section>
+
+    <section class="grid grid-cols-1 gap-4 rounded-xl border border-light-outline bg-white p-5 shadow-sm md:grid-cols-[1fr_auto_1fr_auto] md:items-end">
+      <label class="block text-sm font-semibold text-slate-800">
+        Primeiro registro
+        <select id="comparison-first" class="mt-2 w-full rounded-md border border-light-outline bg-light-surface px-3 py-2 text-sm font-normal text-primary">
+          <option value="">Selecione um histórico</option>
+        </select>
+      </label>
+      <span class="hidden pb-2 text-light-on-surface-variant md:block" aria-hidden="true">×</span>
+      <label class="block text-sm font-semibold text-slate-800">
+        Segundo registro
+        <select id="comparison-second" class="mt-2 w-full rounded-md border border-light-outline bg-light-surface px-3 py-2 text-sm font-normal text-primary">
+          <option value="">Selecione um histórico</option>
+        </select>
+      </label>
+      <button id="compare-button" type="button" class="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">
+        <span class="material-symbols-outlined text-base">compare_arrows</span>
+        Comparar
+      </button>
+    </section>
+
+    <div role="tablist" aria-label="Tipo de comparativo" class="flex flex-wrap gap-2 border-b border-light-outline">
+      <button id="comparison-overview-tab" type="button" role="tab" aria-selected="true" aria-controls="comparison-overview-panel" tabindex="0" class="rounded-t-md border-b-2 border-primary px-4 py-2 text-sm font-semibold text-primary">
+        Comparativo Mensal
+      </button>
+      <button id="driver-details-tab" type="button" role="tab" aria-selected="false" aria-controls="driver-details-panel" tabindex="-1" class="rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-semibold text-slate-500 hover:text-primary">
+        Detalhes Motorista
+      </button>
+      <button id="comparison-charts-tab" type="button" role="tab" aria-selected="false" aria-controls="comparison-charts-panel" tabindex="-1" class="rounded-t-md border-b-2 border-transparent px-4 py-2 text-sm font-semibold text-slate-500 hover:text-primary">
+        Gráficos
+      </button>
+    </div>
+
+    <p id="comparison-status" class="text-sm" role="status" aria-live="polite" hidden></p>
+    <section id="comparison-results" class="flex flex-col gap-6" hidden>
+      <div id="comparison-overview-panel" role="tabpanel" aria-labelledby="comparison-overview-tab" tabindex="0" class="flex flex-col gap-6">
+      <section aria-label="Indicadores do período" class="flex flex-col gap-3">
+        <h2 class="font-headline text-xl font-bold text-primary">Indicadores gerais</h2>
+        <p id="summary-period-label" class="text-sm text-light-on-surface-variant"></p>
+        <div id="summary-columns" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"></div>
+      </section>
+
+      <section aria-label="Rankings Top 10" class="flex flex-col gap-3">
+        <div>
+          <h2 class="font-headline text-xl font-bold text-primary">Rankings Top 10</h2>
+          <p id="ranking-reference-label" class="mt-1 text-sm text-light-on-surface-variant"></p>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          <article class="overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <header class="flex items-center gap-3 border-b border-emerald-200 bg-emerald-50 px-4 py-4">
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-white text-emerald-700" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M3 22V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17"/><path d="M3 10h14M7 6h6M3 22h14"/></svg></span>
+              <div><h3 class="font-semibold text-emerald-900">Melhores médias de consumo</h3><p class="mt-0.5 text-xs text-emerald-700">10 melhores resultados na referência</p></div>
+            </header>
+            <div data-comparison-ranking="best-fuel" class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2"></div>
+          </article>
+          <article class="overflow-hidden rounded-xl border border-rose-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <header class="flex items-center gap-3 border-b border-rose-200 bg-rose-50 px-4 py-4">
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg border border-rose-200 bg-white text-rose-700" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M3 22V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v17"/><path d="M3 10h14M7 6h6M3 22h14"/></svg></span>
+              <div><h3 class="font-semibold text-rose-900">Piores médias de consumo</h3><p class="mt-0.5 text-xs text-rose-700">10 pontos de atenção na referência</p></div>
+            </header>
+            <div data-comparison-ranking="worst-fuel" class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2"></div>
+          </article>
+          <article class="overflow-hidden rounded-xl border border-emerald-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <header class="flex items-center gap-3 border-b border-emerald-200 bg-emerald-50 px-4 py-4">
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-white text-emerald-700" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M12 14 16 10"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/><path d="M12 14v.01"/></svg></span>
+              <div><h3 class="font-semibold text-emerald-900">Melhores notas de telemetria</h3><p class="mt-0.5 text-xs text-emerald-700">10 melhores resultados na referência</p></div>
+            </header>
+            <div data-comparison-ranking="best-telemetry" class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2"></div>
+          </article>
+          <article class="overflow-hidden rounded-xl border border-amber-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+            <header class="flex items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-4">
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg border border-amber-200 bg-white text-amber-700" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M12 14 16 10"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/><path d="M12 14v.01"/></svg></span>
+              <div><h3 class="font-semibold text-amber-900">Piores notas de telemetria</h3><p class="mt-0.5 text-xs text-amber-700">10 pontos de atenção na referência</p></div>
+            </header>
+            <div data-comparison-ranking="worst-telemetry" class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="overflow-hidden rounded-xl border border-light-outline bg-white shadow-sm" aria-label="Comparativo de faixas de notas">
+        <div class="border-b border-light-outline px-5 py-4">
+          <h2 class="font-headline text-xl font-bold text-primary">Faixas de notas de telemetria</h2>
+          <p class="mt-1 text-sm text-light-on-surface-variant">Motoristas únicos com nota válida; percentuais calculados sobre o total avaliado em cada período.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full whitespace-nowrap text-left text-sm">
+            <thead class="bg-light-surface-variant text-xs uppercase text-slate-600">
+              <tr><th class="px-4 py-3">Faixa</th><th id="score-left-heading" class="min-w-52 px-4 py-3">Mês anterior</th><th id="score-right-heading" class="min-w-52 px-4 py-3">Referência</th><th class="px-4 py-3">Variação de quantidade</th><th class="px-4 py-3">Variação percentual</th></tr>
+            </thead>
+            <tbody id="score-band-comparison" class="divide-y divide-light-outline"></tbody>
+          </table>
+        </div>
+      </section>
+      </div>
+
+      <section id="driver-details-panel" role="tabpanel" aria-labelledby="driver-details-tab" tabindex="0" class="flex flex-col gap-4" hidden>
+        <div>
+          <h2 class="font-headline text-xl font-bold text-primary">Detalhes Motorista</h2>
+          <p id="driver-details-period-label" class="mt-1 text-sm text-light-on-surface-variant"></p>
+        </div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <p id="driver-details-count" class="text-sm text-light-on-surface-variant" role="status" aria-live="polite"></p>
+          <label class="block text-sm font-semibold text-slate-800 sm:w-80">
+            Buscar motorista
+            <input id="driver-details-search" type="search" autocomplete="off" placeholder="Digite o nome do motorista" class="mt-2 w-full rounded-md border border-light-outline bg-white px-3 py-2 text-sm font-normal text-primary">
+          </label>
+        </div>
+        <div id="driver-details-table-scroll" class="overflow-x-auto rounded-xl border border-light-outline bg-white shadow-sm">
+          <table class="w-full min-w-[1180px] border-collapse text-left text-sm">
+            <thead class="bg-light-surface-variant text-xs uppercase text-slate-600">
+              <tr>
+                <th scope="col" rowspan="2" class="sticky left-0 z-10 border-r border-light-outline bg-light-surface-variant px-4 py-3">Motorista</th>
+                <th scope="colgroup" colspan="3" class="border-r border-light-outline px-4 py-3 text-center">KM rodado</th>
+                <th scope="colgroup" colspan="3" class="border-r border-light-outline px-4 py-3 text-center">Litragem</th>
+                <th scope="colgroup" colspan="3" class="border-r border-light-outline px-4 py-3 text-center">Média real</th>
+                <th scope="colgroup" colspan="3" class="border-r border-light-outline px-4 py-3 text-center">Valor total</th>
+                <th scope="colgroup" colspan="3" class="px-4 py-3 text-center">Economia gerada</th>
+              </tr>
+              <tr>
+                <th scope="col" class="px-3 py-2">Anterior</th><th scope="col" class="px-3 py-2">Atual</th><th scope="col" class="border-r border-light-outline px-3 py-2">Variação</th>
+                <th scope="col" class="px-3 py-2">Anterior</th><th scope="col" class="px-3 py-2">Atual</th><th scope="col" class="border-r border-light-outline px-3 py-2">Variação</th>
+                <th scope="col" class="px-3 py-2">Anterior</th><th scope="col" class="px-3 py-2">Atual</th><th scope="col" class="border-r border-light-outline px-3 py-2">Variação</th>
+                <th scope="col" class="px-3 py-2">Anterior</th><th scope="col" class="px-3 py-2">Atual</th><th scope="col" class="border-r border-light-outline px-3 py-2">Variação</th>
+                <th scope="col" class="px-3 py-2">Anterior</th><th scope="col" class="px-3 py-2">Atual</th><th scope="col" class="px-3 py-2">Variação</th>
+              </tr>
+            </thead>
+            <tbody id="driver-details-body" class="divide-y divide-light-outline"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="comparison-charts-panel" role="tabpanel" aria-labelledby="comparison-charts-tab" tabindex="0" hidden>
+        <div id="comparison-charts-root"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="mt-auto border-t border-light-outline bg-white py-3 px-6 text-xs text-light-on-surface-variant flex items-center justify-between">
+    <span class="font-bold text-primary">Libardo Transportes</span>
+    <span>Comparação dos históricos salvos localmente</span>
+  </footer>
+  <script src="js/comparison-charts.js"></script>
+  <script type="module" src="js/app-bootstrap.js"></script>
+</body>
+</html>
