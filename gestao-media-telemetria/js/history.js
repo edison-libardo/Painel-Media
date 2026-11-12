@@ -69,13 +69,13 @@ import { isAdmin } from "./services/auth-service.js";
         actions.className = "flex shrink-0 flex-wrap items-center gap-2";
         const open = document.createElement("a");
         open.className = "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700";
-        open.href = `index.html?historico=${encodeURIComponent(record.id)}`;
+        open.href = `/index.html?historico=${encodeURIComponent(record.id)}`;
         open.innerHTML = '<span class="material-symbols-outlined text-sm">visibility</span><span>Visualizar</span>';
         actions.append(open);
         if (isAdmin()) {
           const edit = document.createElement("a");
           edit.className = "inline-flex items-center gap-1.5 rounded-md bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700";
-          edit.href = `index.html?historico=${encodeURIComponent(record.id)}&editar=1`;
+          edit.href = `/index.html?historico=${encodeURIComponent(record.id)}&editar=1`;
           edit.innerHTML = '<span class="material-symbols-outlined text-sm">edit</span><span>Editar</span>';
           const rename = document.createElement("button");
           rename.type = "button";

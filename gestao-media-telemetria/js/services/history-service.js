@@ -2,6 +2,9 @@ import { restoreSharedValue, saveSharedValue } from "./shared-storage.js";
 import { getCurrentRole } from "./auth-service.js";
 
 export const HISTORY_STORAGE_KEY = "libardo-logistics-monthly-history-v1";
+export const ACTIVE_HISTORY_ID_KEY = "libardo-logistics-active-history-v1";
+export const ACTIVE_HISTORY_EDIT_KEY = "libardo-logistics-active-history-edit-v1";
+export const ACTIVE_HISTORY_DRAFT_PREFIX = "libardo-logistics-history-draft-v1:";
 
 const readHistory = () => {
   const history = restoreSharedValue(HISTORY_STORAGE_KEY);

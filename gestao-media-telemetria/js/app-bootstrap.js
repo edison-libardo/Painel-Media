@@ -1,5 +1,10 @@
 import { requireUser, logout } from "./services/auth-service.js";
 import { initializeSharedStorage } from "./services/shared-storage.js";
+import {
+  ACTIVE_HISTORY_DRAFT_PREFIX,
+  ACTIVE_HISTORY_EDIT_KEY,
+  ACTIVE_HISTORY_ID_KEY,
+} from "./services/history-service.js";
 
 const pageScripts = {
   "index.html": "./dashboard.js",
@@ -61,6 +66,12 @@ try {
         signOut.textContent = "Sair";
         signOut.addEventListener("click", async () => {
           try {
+            const activeHistoryId = sessionStorage.getItem(ACTIVE_HISTORY_ID_KEY);
+            if (activeHistoryId) {
+              sessionStorage.removeItem(`${ACTIVE_HISTORY_DRAFT_PREFIX}${activeHistoryId}`);
+            }
+            sessionStorage.removeItem(ACTIVE_HISTORY_ID_KEY);
+            sessionStorage.removeItem(ACTIVE_HISTORY_EDIT_KEY);
             await logout();
             window.location.replace("login.html");
           } catch (error) {

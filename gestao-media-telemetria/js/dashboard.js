@@ -14,6 +14,9 @@ import {
   text,
 } from "./services/data-service.js";
 import {
+  ACTIVE_HISTORY_EDIT_KEY,
+  ACTIVE_HISTORY_DRAFT_PREFIX,
+  ACTIVE_HISTORY_ID_KEY,
   getHistoryRecords,
   getHistoryRecord,
   saveHistoryRecord,
@@ -42,9 +45,25 @@ import {
     backupStatus.className = `text-xs ${event.detail.isError ? "text-rose-300" : "text-emerald-300"}`;
   });
 
-  const historyId = new URLSearchParams(window.location.search).get("historico");
-  const historyEditMode = new URLSearchParams(window.location.search).get("editar") === "1"
-    && document.body.dataset.userRole === "adm";
+  const historyParams = new URLSearchParams(window.location.search);
+  const requestedHistoryId = historyParams.get("historico");
+  if (requestedHistoryId) {
+    sessionStorage.setItem(ACTIVE_HISTORY_ID_KEY, requestedHistoryId);
+    sessionStorage.setItem(ACTIVE_HISTORY_EDIT_KEY, historyParams.get("editar") === "1" ? "1" : "0");
+  }
+  const historyId = requestedHistoryId || sessionStorage.getItem(ACTIVE_HISTORY_ID_KEY);
+  const requestedEditMode = requestedHistoryId
+    ? historyParams.get("editar") === "1"
+    : sessionStorage.getItem(ACTIVE_HISTORY_EDIT_KEY) === "1";
+  const historyEditMode = requestedEditMode && document.body.dataset.userRole === "adm";
+  const historyDraftStorageKey = historyId ? `${ACTIVE_HISTORY_DRAFT_PREFIX}${historyId}` : null;
+  if (historyId && !requestedHistoryId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("historico", historyId);
+    if (historyEditMode) url.searchParams.set("editar", "1");
+    else url.searchParams.delete("editar");
+    window.history.replaceState(null, "", url);
+  }
   let historicalRecord = null;
   let historyDraft = null;
   let historyLoadError = "";
@@ -57,7 +76,24 @@ import {
       historyLoadError = error instanceof Error ? `Não foi possível abrir o histórico: ${error.message}` : "Não foi possível abrir o histórico.";
     }
     if (historicalRecord && historyEditMode) {
-      historyDraft = JSON.parse(JSON.stringify(historicalRecord.data));
+      const savedDraft = historyDraftStorageKey && sessionStorage.getItem(historyDraftStorageKey);
+      if (savedDraft) {
+        try {
+          const parsedDraft = JSON.parse(savedDraft);
+          if (!Array.isArray(parsedDraft.fuel) || !Array.isArray(parsedDraft.telemetry)) {
+            throw new Error("O rascunho do hist\u00f3rico est\u00e1 inv\u00e1lido.");
+          }
+          historyDraft = parsedDraft;
+        } catch (error) {
+          sessionStorage.removeItem(historyDraftStorageKey);
+          historyLoadError = error instanceof Error
+            ? `N\u00e3o foi poss\u00edvel recuperar as altera\u00e7\u00f5es tempor\u00e1rias: ${error.message}`
+            : "N\u00e3o foi poss\u00edvel recuperar as altera\u00e7\u00f5es tempor\u00e1rias.";
+          historyDraft = JSON.parse(JSON.stringify(historicalRecord.data));
+        }
+      } else {
+        historyDraft = JSON.parse(JSON.stringify(historicalRecord.data));
+      }
     }
     document.body.classList.add("historical-view");
     const main = document.querySelector("main");
@@ -75,10 +111,21 @@ import {
           ? "Edite as células da tabela e salve as alterações no arquivo histórico. A base operacional não será alterada."
           : "Modo somente leitura. Os dados atuais do painel não foram alterados.";
         const link = document.createElement("a");
-        link.href = "historico.html";
+        link.href = "/historico";
         link.className = "mt-2 inline-flex text-sm font-semibold underline";
+        link.addEventListener("click", () => {
+          sessionStorage.removeItem(ACTIVE_HISTORY_ID_KEY);
+          sessionStorage.removeItem(ACTIVE_HISTORY_EDIT_KEY);
+          if (historyDraftStorageKey) sessionStorage.removeItem(historyDraftStorageKey);
+        });
         link.textContent = "Voltar à lista de históricos";
         notice.append(title, description);
+        if (historyLoadError) {
+          const warning = document.createElement("p");
+          warning.className = "mt-1 text-sm font-semibold";
+          warning.textContent = historyLoadError;
+          notice.append(warning);
+        }
         if (historyEditMode) {
           const saveChanges = document.createElement("button");
           saveChanges.type = "button";
@@ -88,6 +135,7 @@ import {
             try {
               historicalRecord = await updateHistoryRecordData(historyId, historyDraft);
               historyDraft = historicalRecord.data;
+              if (historyDraftStorageKey) sessionStorage.removeItem(historyDraftStorageKey);
               render(historyDraft);
               saveChanges.textContent = "Alterações salvas";
               window.setTimeout(() => {
@@ -105,7 +153,7 @@ import {
             const page = anchor.getAttribute("href");
             const query = new URLSearchParams({ historico: historyId });
             if (historyEditMode) query.set("editar", "1");
-            anchor.href = `${page}?${query}`;
+            anchor.href = `/${page}?${query}`;
           });
       } else {
         notice.textContent = historyLoadError;
@@ -538,6 +586,9 @@ import {
             historyDraft.sampleOverrides.push(override);
           }
           override.values[field === "vehicle" ? "vehicleType" : field] = value;
+          if (historyDraftStorageKey) {
+            sessionStorage.setItem(historyDraftStorageKey, JSON.stringify(historyDraft));
+          }
           const displayValue = value == null || value === "" ? "—" : String(value);
           if (field === "driver") {
             const name = cell.querySelector(".leading-snug");
