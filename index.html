@@ -9,9 +9,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         document.body.innerHTML = `
           <main style="max-width:640px;margin:12vh auto;padding:24px;font:16px/1.6 Arial,sans-serif;color:#172033">
-            <h1>Abra o painel pelo iniciador</h1>
-            <p>O navegador não executa os módulos do painel quando o HTML é aberto diretamente pelo ícone antigo.</p>
-            <p>Execute <strong>Abrir Painel.bat</strong> na pasta do projeto. Ele inicia o servidor local e abre o painel no navegador.</p>
+            <h1>Abra o painel por HTTP</h1>
+            <p>O navegador não executa os módulos JavaScript quando o HTML é aberto diretamente pelo protocolo file://.</p>
+            <p>Para desenvolvimento local, inicie um servidor HTTP na pasta gestao-media-telemetria (por exemplo, py -m http.server 8000) e acesse http://localhost:8000. Em produção, acesse a URL publicada no Netlify.</p>
           </main>`;
       });
     } else {

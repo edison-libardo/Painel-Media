@@ -1,4 +1,5 @@
 import {
+  deleteHistoryRecord,
   getHistoryRecords,
   renameHistoryRecord,
 } from "./services/history-service.js";
@@ -89,7 +90,25 @@ import { isAdmin } from "./services/auth-service.js";
             nameInput.focus();
             nameInput.select();
           });
-          actions.append(edit, rename);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "inline-flex items-center gap-1.5 rounded-md border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50";
+          remove.setAttribute("aria-label", `Excluir hist\u00f3rico ${record.name}`);
+          remove.innerHTML = '<span class="material-symbols-outlined text-sm">delete</span><span>Excluir</span>';
+          remove.addEventListener("click", async () => {
+            if (!window.confirm(`Excluir o hist\u00f3rico "${record.name}"? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.`)) return;
+            remove.disabled = true;
+            try {
+              await deleteHistoryRecord(record.id);
+              render();
+            } catch (error) {
+              remove.disabled = false;
+              showError(error instanceof Error
+                ? `N\u00e3o foi poss\u00edvel excluir o hist\u00f3rico: ${error.message}`
+                : "N\u00e3o foi poss\u00edvel excluir o hist\u00f3rico.");
+            }
+          });
+          actions.append(edit, rename, remove);
         }
         item.append(details, actions);
         list.append(item);

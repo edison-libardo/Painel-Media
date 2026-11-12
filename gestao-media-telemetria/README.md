@@ -1,10 +1,8 @@
 # Gestão Média e Telemetria
 
-Painel web para consolidar indicadores de consumo de combustível e telemetria de frotas. Os arquivos são processados localmente. Os dados ficam no navegador e também em arquivos JSON na pasta `data` compartilhada. Em cada computador, abra o painel pelo atalho `Abrir Painel.bat` localizado nesta mesma pasta de rede; assim, as alterações e os históricos ficam disponíveis para os outros computadores. É necessário ter permissão de gravação nessa pasta.
+Painel web para consolidar indicadores de consumo de combustível e telemetria de frotas. Para uso em produção, acesse o site publicado no Netlify. Os dados operacionais e históricos são sincronizados pelo Firebase; os arquivos importados são processados no navegador. Para desenvolvimento local, use um servidor HTTP conforme descrito abaixo.
 
-Na primeira abertura após esta atualização, execute o atalho primeiro no computador que já possui os dados e históricos corretos. Os dados locais não vazios serão copiados para a pasta compartilhada; depois disso, essa pasta passa a ser a fonte usada pelos demais computadores.
-
-As alterações são salvas automaticamente no armazenamento deste navegador. O painel não baixa backups automaticamente; use o botão **Backup** para baixar uma cópia JSON quando desejar, ou **Restaurar** para carregar uma cópia existente. O backup contém os dados processados do painel, não uma cópia dos arquivos de origem.
+O painel não baixa backups automaticamente; use o botão **Backup** para baixar uma cópia JSON quando desejar, ou **Restaurar** para carregar uma cópia existente. O backup contém os dados processados do painel, não uma cópia dos arquivos de origem.
 
 ## Funcionalidades
 
@@ -77,8 +75,7 @@ gestao-media-telemetria/
 
 Como o painel usa módulos JavaScript, abra-o por um servidor HTTP local, não diretamente via `file://`.
 
-1. Para abrir pelo ícone do Windows, execute `Abrir Painel.bat` na pasta do projeto (ou crie um atalho para esse arquivo). O iniciador funciona também em pastas de rede UNC, não requer Python e fecha a janela do CMD após abrir o painel.
-2. Alternativamente, abra esta pasta no VS Code e inicie o **Live Server**; ou, com Python instalado, execute no terminal:
+1. Abra esta pasta no VS Code e inicie o **Live Server**; ou, com Python instalado, execute no terminal:
 
    ```powershell
    py -m http.server 8000
@@ -86,7 +83,7 @@ Como o painel usa módulos JavaScript, abra-o por um servidor HTTP local, não d
 
 3. Com o servidor manual, acesse `http://localhost:8000` no navegador. As telas de rankings, histórico e comparativo ficam em `http://localhost:8000/rankings.html`, `http://localhost:8000/historico.html` e `http://localhost:8000/comparativo.html`.
 
-Não abra os arquivos HTML diretamente por `file://`: o navegador bloqueia os módulos JavaScript nesse modo. O arquivo `Abrir Painel.bat` usa PowerShell para iniciar um servidor HTTP local oculto em uma porta disponível e abrir o painel.
+Não abra os arquivos HTML diretamente por `file://`: o navegador bloqueia os módulos JavaScript nesse modo. Em produção, o Netlify publica os arquivos estáticos definidos em `netlify.toml` e as funções em `netlify/functions`.
 
 Tailwind CSS, fontes, PDF.js e a biblioteca de leitura Excel são carregados de CDNs. É necessária conexão com a internet para carregar esses recursos. Os arquivos importados não são enviados a um servidor; permanecem no navegador utilizado.
 

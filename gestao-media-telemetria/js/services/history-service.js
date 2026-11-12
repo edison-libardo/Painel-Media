@@ -65,6 +65,14 @@ export const renameHistoryRecord = async (id, name) => {
   return record;
 };
 
+export const deleteHistoryRecord = async (id) => {
+  const history = readHistory();
+  const record = history.find((item) => item.id === id);
+  if (!record) throw new Error("O hist\u00f3rico selecionado n\u00e3o foi encontrado.");
+  await writeHistory(history.filter((item) => item.id !== id));
+  return record;
+};
+
 export const updateHistoryRecordData = async (id, state) => {
   if (!state || !Array.isArray(state.fuel) || !Array.isArray(state.telemetry)) {
     throw new Error("Dados inválidos para salvar no histórico.");
