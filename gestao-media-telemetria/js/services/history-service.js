@@ -19,17 +19,18 @@ const readHistory = () => {
   return history;
 };
 
-const writeHistory = (history) => {
+const writeHistory = async (history) => {
   if (getCurrentRole() !== "adm") throw new Error("Somente administradores podem alterar os históricos.");
+  const saved = await saveSharedValue(HISTORY_STORAGE_KEY, history);
+  if (!saved) throw new Error("Falha ao sincronizar o hist\u00f3rico com o Firebase.");
   localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
-  return saveSharedValue(HISTORY_STORAGE_KEY, history);
 };
 
 export const getHistoryRecords = () => readHistory();
 
 export const getHistoryRecord = (id) => readHistory().find((record) => record.id === id) || null;
 
-export const saveHistoryRecord = (name, state) => {
+export const saveHistoryRecord = async (name, state) => {
   const normalizedName = String(name ?? "").trim();
   if (!normalizedName) throw new Error("Informe um nome para o histórico.");
   if (!state || !Array.isArray(state.fuel) || !Array.isArray(state.telemetry)) {
@@ -46,22 +47,22 @@ export const saveHistoryRecord = (name, state) => {
     data: JSON.parse(JSON.stringify(state)),
   };
   history.unshift(record);
-  writeHistory(history);
+  await writeHistory(history);
   return record;
 };
 
-export const renameHistoryRecord = (id, name) => {
+export const renameHistoryRecord = async (id, name) => {
   const normalizedName = String(name ?? "").trim();
   if (!normalizedName) throw new Error("O nome do histórico não pode ficar vazio.");
   const history = readHistory();
   const record = history.find((item) => item.id === id);
   if (!record) throw new Error("O histórico selecionado não foi encontrado.");
   record.name = normalizedName;
-  writeHistory(history);
+  await writeHistory(history);
   return record;
 };
 
-export const updateHistoryRecordData = (id, state) => {
+export const updateHistoryRecordData = async (id, state) => {
   if (!state || !Array.isArray(state.fuel) || !Array.isArray(state.telemetry)) {
     throw new Error("Dados inválidos para salvar no histórico.");
   }
@@ -70,6 +71,6 @@ export const updateHistoryRecordData = (id, state) => {
   if (!record) throw new Error("O histórico selecionado não foi encontrado.");
   record.data = JSON.parse(JSON.stringify(state));
   record.updatedAt = new Date().toISOString();
-  writeHistory(history);
+  await writeHistory(history);
   return record;
 };

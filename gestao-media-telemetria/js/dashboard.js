@@ -84,9 +84,9 @@ import {
           saveChanges.type = "button";
           saveChanges.className = "mt-3 mr-3 rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800";
           saveChanges.textContent = "Salvar alterações";
-          saveChanges.addEventListener("click", () => {
+          saveChanges.addEventListener("click", async () => {
             try {
-              historicalRecord = updateHistoryRecordData(historyId, historyDraft);
+              historicalRecord = await updateHistoryRecordData(historyId, historyDraft);
               historyDraft = historicalRecord.data;
               render(historyDraft);
               saveChanges.textContent = "Alterações salvas";
@@ -720,7 +720,7 @@ import {
         restoreInput.value = "";
       }
     });
-    document.getElementById("save-history")?.addEventListener("click", () => {
+    document.getElementById("save-history")?.addEventListener("click", async () => {
       try {
         const state = readState();
         if (!state) throw new Error("Não há dados carregados para salvar.");
@@ -728,7 +728,7 @@ import {
         const date = Number.isNaN(importedAt.getTime()) ? new Date() : importedAt;
         const monthName = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(date);
         const suggestedName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-        const record = saveHistoryRecord(suggestedName, state);
+        const record = await saveHistoryRecord(suggestedName, state);
         window.alert(`Histórico "${record.name}" salvo. Você pode consultá-lo na página Histórico.`);
       } catch (error) {
         window.alert(error instanceof Error ? error.message : "Não foi possível salvar o histórico.");

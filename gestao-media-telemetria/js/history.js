@@ -100,10 +100,10 @@ import { isAdmin } from "./services/auth-service.js";
   };
 
   document.getElementById("cancel-rename").addEventListener("click", () => dialog.close());
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      renameHistoryRecord(renamingId, nameInput.value);
+      await renameHistoryRecord(renamingId, nameInput.value);
       dialog.close();
       renamingId = null;
       render();
