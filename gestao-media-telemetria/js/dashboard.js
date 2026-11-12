@@ -103,7 +103,9 @@ import {
         document.querySelectorAll('nav[aria-label="Navegação principal"] a[href="index.html"], nav[aria-label="Navegação principal"] a[href="rankings.html"]')
           .forEach((anchor) => {
             const page = anchor.getAttribute("href");
-            anchor.href = `${page}?historico=${encodeURIComponent(historyId)}`;
+            const query = new URLSearchParams({ historico: historyId });
+            if (historyEditMode) query.set("editar", "1");
+            anchor.href = `${page}?${query}`;
           });
       } else {
         notice.textContent = historyLoadError;
