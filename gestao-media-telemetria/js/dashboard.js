@@ -324,7 +324,7 @@ import {
     if (document.body.dataset.page !== "sample") return;
     const body = document.querySelector("main table tbody");
     if (!body) return;
-    body.replaceChildren();
+    const rows = document.createDocumentFragment();
     records.forEach((record, recordIndex) => {
       const row = document.createElement("tr");
       row.className = "hover:bg-light-surface-variant/70 transition-colors";
@@ -434,8 +434,9 @@ import {
         }
         row.append(cell);
       });
-      body.append(row);
+      rows.append(row);
     });
+    body.replaceChildren(rows);
     const count = document.getElementById("record-count");
     if (count) count.textContent = `Exibindo ${records.length} de ${records.length} ${records.length === 1 ? "registro" : "registros"}`;
     const vehicleFilter = document.getElementById("vehicle-filter");

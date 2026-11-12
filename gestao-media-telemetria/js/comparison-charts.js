@@ -1,6 +1,10 @@
+import * as React from "react";
+import { createRoot } from "react-dom/client";
+import Chart from "chart.js/auto";
+
 (() => {
   const { createElement: h, useEffect, useRef } = React;
-  const root = ReactDOM.createRoot(document.getElementById("comparison-charts-root"));
+  const root = createRoot(document.getElementById("comparison-charts-root"));
   const colors = ["#64748b", "#0f766e", "#2563eb", "#d97706", "#7c3aed", "#0891b2", "#db2777", "#65a30d"];
 
   const numberFormat = (value, digits = 2) => new Intl.NumberFormat("pt-BR", {

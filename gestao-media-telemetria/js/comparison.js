@@ -130,7 +130,40 @@ import { getHistoryRecords, HISTORY_STORAGE_KEY } from "./services/history-servi
     });
     if (activeTab === driverDetailsTab) syncDriverDetailsStickyHeader();
     if (focus) activeTab.focus();
-    if (activeTab === chartsTab) window.dispatchEvent(new Event("comparison-charts-visible"));
+    if (activeTab === chartsTab) void showComparisonCharts();
+  };
+
+  let chartModulePromise;
+  let chartComparison;
+  let chartPeriodsSource;
+  let chartPeriodsCache;
+  const showComparisonCharts = async () => {
+    if (!chartComparison) return;
+    try {
+      chartModulePromise ||= import("./comparison-charts.js");
+      await chartModulePromise;
+      if (typeof window.renderComparisonCharts !== "function") {
+        throw new Error("O módulo de gráficos não foi inicializado.");
+      }
+      if (chartPeriodsSource !== historyRecords) {
+        const chartMetrics = (records) => Object.fromEntries(
+          summaryFor(records).map((metric) => [metric.key, metric.comparisonValue]),
+        );
+        chartPeriodsCache = historyRecords.map((record) => ({
+          name: record.name,
+          metrics: chartMetrics(mergeData(record.data)
+            .filter((entry) => !excludedComparisonDrivers.has(normalizedName(entry.driver)))),
+        }));
+        chartPeriodsSource = historyRecords;
+      }
+      window.renderComparisonCharts({ ...chartComparison, allPeriods: chartPeriodsCache });
+      window.dispatchEvent(new Event("comparison-charts-visible"));
+    } catch (error) {
+      chartModulePromise = undefined;
+      setStatus(error instanceof Error
+        ? `Não foi possível carregar os gráficos: ${error.message}`
+        : "Não foi possível carregar os gráficos.", true);
+    }
   };
 
   [overviewTab, driverDetailsTab, chartsTab].forEach((tab, index, tabs) => {
@@ -873,18 +906,12 @@ import { getHistoryRecords, HISTORY_STORAGE_KEY } from "./services/history-servi
       const chartMetrics = (records) => Object.fromEntries(
         summaryFor(records).map((metric) => [metric.key, metric.comparisonValue]),
       );
-      const allPeriods = historyRecords.map((record) => ({
-        name: record.name,
-        metrics: chartMetrics(mergeData(record.data)
-          .filter((entry) => !excludedComparisonDrivers.has(normalizedName(entry.driver)))),
-      }));
-      window.renderComparisonCharts({
+      chartComparison = {
         previousName: older.name,
         currentName: newer.name,
         previous: chartMetrics(olderRecords),
         current: chartMetrics(newerRecords),
-        allPeriods,
-      });
+      };
 
       const fuelRanks = (records) => records.filter((record) =>
         record.factory > 0 && record.real != null && record.deviation != null);
@@ -906,6 +933,7 @@ import { getHistoryRecords, HISTORY_STORAGE_KEY } from "./services/history-servi
       renderScoreBands(older, newer, olderRecords, newerRecords);
       results.hidden = false;
       setStatus("");
+      if (chartsTab.getAttribute("aria-selected") === "true") void showComparisonCharts();
     } catch (error) {
       results.hidden = true;
       setStatus(error instanceof Error ? `Não foi possível comparar os históricos: ${error.message}` : "Não foi possível comparar os históricos.", true);

@@ -266,28 +266,28 @@
         currentPage = Math.min(currentPage, pageCount);
         const start = (currentPage - 1) * pageSize;
         const visibleRows = displayRows.slice(start, start + pageSize);
-        tableBody.querySelectorAll("tr.driver-group-summary").forEach((row) => row.remove());
-        allRows.forEach((row) => {
-          row.hidden = true;
+        tableBody.querySelectorAll("tr.driver-group-detail").forEach((row) => {
           row.classList.remove("driver-group-detail");
           delete row.dataset.groupDetail;
         });
+        const pageFragment = document.createDocumentFragment();
         visibleRows.forEach((item) => {
           if (Array.isArray(item.rows)) {
-            tableBody.append(createGroupRow(item));
+            pageFragment.append(createGroupRow(item));
             if (expandedGroups.has(item.key)) {
               item.rows.forEach((row) => {
                 row.hidden = false;
                 row.classList.add("driver-group-detail");
                 row.dataset.groupDetail = item.key;
-                tableBody.append(row);
+                pageFragment.append(row);
               });
             }
           } else {
             item.hidden = false;
-            tableBody.append(item);
+            pageFragment.append(item);
           }
         });
+        tableBody.replaceChildren(pageFragment);
         countLabel.textContent = `Exibindo ${displayRows.length ? start + 1 : 0}-${Math.min(start + pageSize, displayRows.length)} de ${displayRows.length} ${displayRows.length === 1 ? "linha" : "linhas"} (${filteredRows.length} ${filteredRows.length === 1 ? "registro" : "registros"})`;
         paginationSummary.innerHTML = `Página <strong class="text-primary font-bold">${currentPage}</strong> de <strong class="text-primary font-bold">${pageCount}</strong> (${displayRows.length} ${displayRows.length === 1 ? "linha" : "linhas"} · ${filteredRows.length} de ${allRows.length} registros)`;
         renderPagination(pageCount);

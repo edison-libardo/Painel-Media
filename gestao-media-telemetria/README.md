@@ -42,6 +42,7 @@ gestao-media-telemetria/
 ├── css/
 │   ├── variables.css
 │   ├── global.css
+│   ├── tailwind.css
 │   └── dashboard.css
 ├── js/
 │   ├── components/
@@ -54,8 +55,9 @@ gestao-media-telemetria/
 │   ├── file-protocol-guard.js
 │   ├── dashboard.js
 │   ├── history.js
-│   ├── comparison.js
-│   └── tailwind-config.js
+│   └── comparison.js
+├── public/
+│   └── _redirects
 ├── scripts/
 │   ├── open_panel.ps1
 │   └── truckpag_pdf.py
@@ -67,25 +69,23 @@ gestao-media-telemetria/
 ├── historico.html
 ├── comparativo.html
 ├── requirements.txt
+├── postcss.config.cjs
+├── tailwind.config.cjs
+├── vite.config.js
 ├── .gitignore
 └── README.md
 ```
 
 ## Executar localmente
 
-Como o painel usa módulos JavaScript, abra-o por um servidor HTTP local, não diretamente via `file://`.
+Requer Node.js 20 ou superior. A partir desta pasta, instale as dependências e inicie o servidor de desenvolvimento:
 
-1. Abra esta pasta no VS Code e inicie o **Live Server**; ou, com Python instalado, execute no terminal:
+```powershell
+npm install
+npm run dev
+```
 
-   ```powershell
-   py -m http.server 8000
-   ```
-
-3. Com o servidor manual, acesse `http://localhost:8000` no navegador. As telas de rankings, histórico e comparativo ficam em `http://localhost:8000/rankings.html`, `http://localhost:8000/historico.html` e `http://localhost:8000/comparativo.html`.
-
-Não abra os arquivos HTML diretamente por `file://`: o navegador bloqueia os módulos JavaScript nesse modo. Em produção, o Netlify publica os arquivos estáticos definidos em `netlify.toml` e as funções em `netlify/functions`.
-
-Tailwind CSS, fontes, PDF.js e a biblioteca de leitura Excel são carregados de CDNs. É necessária conexão com a internet para carregar esses recursos. Os arquivos importados não são enviados a um servidor; permanecem no navegador utilizado.
+Para validar a publicação de produção, execute `npm run build`. O resultado e os assets prontos para publicação ficam em `dist/`; o Netlify executa esse build por meio de `netlify.toml`. Tailwind CSS e os gráficos são compilados localmente. Fontes, PDF.js e a biblioteca de leitura Excel continuam sendo carregados sob demanda ou de CDNs. Os arquivos importados permanecem no navegador utilizado.
 
 ## Importação
 

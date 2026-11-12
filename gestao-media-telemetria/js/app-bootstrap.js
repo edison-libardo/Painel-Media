@@ -7,12 +7,12 @@ import {
 } from "./services/history-service.js";
 
 const pageScripts = {
-  "index.html": "./dashboard.js",
-  "rankings.html": "./dashboard.js",
-  "historico.html": "./history.js",
-  "comparativo.html": "./comparison.js",
-  "admin-users.html": "./admin-users.js",
-  "migrar-dados.html": "./migrate-data.js",
+  "index.html": () => import("./dashboard.js"),
+  "rankings.html": () => import("./dashboard.js"),
+  "historico.html": () => import("./history.js"),
+  "comparativo.html": () => import("./comparison.js"),
+  "admin-users.html": () => import("./admin-users.js"),
+  "migrar-dados.html": () => import("./migrate-data.js"),
 };
 
 try {
@@ -23,7 +23,13 @@ try {
     if (access.role !== "adm" && ["admin-users.html", "migrar-dados.html"].includes(pageName)) {
       window.location.replace("index.html");
     } else {
-      await initializeSharedStorage();
+      const storageScope = {
+        dashboard: ["index.html", "rankings.html"].includes(pageName),
+        history: ["index.html", "rankings.html", "historico.html", "comparativo.html"].includes(pageName),
+      };
+      if (pageScripts[pageName] && pageName !== "admin-users.html") {
+        await initializeSharedStorage(storageScope);
+      }
       document.body.dataset.userRole = access.role;
 
       if (access.role !== "adm") {
@@ -82,11 +88,11 @@ try {
         header.append(account);
       }
 
-      const script = pageScripts[pageName];
-      if (!script) {
+      const loadPage = pageScripts[pageName];
+      if (!loadPage) {
         window.location.replace("index.html");
       } else {
-        await import(script);
+        await loadPage();
       }
     }
   }

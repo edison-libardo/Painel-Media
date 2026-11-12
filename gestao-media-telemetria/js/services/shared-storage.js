@@ -20,6 +20,8 @@ const syncRef = doc(db, "sharedMeta", "version");
 const MAX_CHUNK_BYTES = 400_000;
 const textEncoder = new TextEncoder();
 let baseRevision = 0;
+let sharedStorageInitialization;
+let storageScope = { dashboard: false, history: false };
 
 const dispatchStorageStatus = (message, isError = false) => {
   window.dispatchEvent(new CustomEvent("libardo-storage-status", {
@@ -98,38 +100,54 @@ const saveDashboard = async (value, metadata) => {
   await batch.commit();
 };
 
-export const initializeSharedStorage = async () => {
-  const [dashboardSnapshot, historySnapshot, syncSnapshot] = await Promise.all([
-    getDocs(dashboardRef),
-    getDocs(historyRef),
-    getDoc(syncRef),
-  ]);
-  const revision = syncSnapshot.exists() ? syncSnapshot.data().revision || 0 : 0;
-  if (revision < baseRevision) return;
-  baseRevision = revision;
-  updateLocalCache(DASHBOARD_KEY, dashboardSnapshot.size
-    ? snapshotDashboard(dashboardSnapshot)
-    : { version: 1, fuel: [], telemetry: [] });
-  updateLocalCache(HISTORY_KEY, snapshotHistory(historySnapshot));
-
-  onSnapshot(dashboardRef, (snapshot) => {
-    updateLocalCache(DASHBOARD_KEY, snapshot.size
-      ? snapshotDashboard(snapshot)
-      : { version: 1, fuel: [], telemetry: [] });
-  }, (error) => dispatchStorageStatus(`Falha ao sincronizar o painel: ${error.message}`, true));
-
-  onSnapshot(historyRef, (snapshot) => {
-    updateLocalCache(HISTORY_KEY, snapshotHistory(snapshot));
-  }, (error) => dispatchStorageStatus(`Falha ao sincronizar os históricos: ${error.message}`, true));
-
-  onSnapshot(syncRef, (snapshot) => {
-    const revision = snapshot.exists() ? snapshot.data().revision || 0 : 0;
-    if (revision > baseRevision) {
-      refreshSharedCache().catch((error) => {
-        dispatchStorageStatus(`Falha ao atualizar os dados compartilhados: ${error.message}`, true);
-      });
+const subscribeToInitialSnapshot = (reference, onValue, errorMessage) => new Promise((resolve, reject) => {
+  let initialized = false;
+  onSnapshot(reference, (snapshot) => {
+    try {
+      onValue(snapshot);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "erro inesperado";
+      dispatchStorageStatus(`${errorMessage}: ${message}`, true);
+      if (!initialized) {
+        initialized = true;
+        reject(error);
+      }
+      return;
     }
-  }, (error) => dispatchStorageStatus(`Falha ao sincronizar a versão dos dados: ${error.message}`, true));
+    if (!initialized) {
+      initialized = true;
+      resolve();
+    }
+  }, (error) => {
+    dispatchStorageStatus(`${errorMessage}: ${error.message}`, true);
+    if (!initialized) {
+      initialized = true;
+      reject(error);
+    }
+  });
+});
+
+export const initializeSharedStorage = ({ dashboard = true, history = true } = {}) => {
+  if (sharedStorageInitialization) return sharedStorageInitialization;
+  storageScope = { dashboard, history };
+  const subscriptions = [];
+  if (dashboard) {
+    subscriptions.push(subscribeToInitialSnapshot(dashboardRef, (snapshot) => {
+      updateLocalCache(DASHBOARD_KEY, snapshot.size
+        ? snapshotDashboard(snapshot)
+        : { version: 1, fuel: [], telemetry: [] });
+    }, "Falha ao sincronizar o painel"));
+  }
+  if (history) {
+    subscriptions.push(subscribeToInitialSnapshot(historyRef, (snapshot) => {
+      updateLocalCache(HISTORY_KEY, snapshotHistory(snapshot));
+    }, "Falha ao sincronizar os históricos"));
+  }
+  subscriptions.push(subscribeToInitialSnapshot(syncRef, (snapshot) => {
+    baseRevision = snapshot.exists() ? snapshot.data().revision || 0 : 0;
+  }, "Falha ao sincronizar a versão dos dados"));
+  sharedStorageInitialization = Promise.all(subscriptions).then(() => undefined);
+  return sharedStorageInitialization;
 };
 
 export const loadSharedValue = (key) => {
@@ -179,15 +197,17 @@ const saveHistory = async (records, metadata) => {
 
 const refreshSharedCache = async () => {
   const [dashboardSnapshot, historySnapshot, syncSnapshot] = await Promise.all([
-    getDocs(dashboardRef),
-    getDocs(historyRef),
+    storageScope.dashboard ? getDocs(dashboardRef) : null,
+    storageScope.history ? getDocs(historyRef) : null,
     getDoc(syncRef),
   ]);
   baseRevision = syncSnapshot.exists() ? syncSnapshot.data().revision || 0 : 0;
-  updateLocalCache(DASHBOARD_KEY, dashboardSnapshot.size
-    ? snapshotDashboard(dashboardSnapshot)
-    : { version: 1, fuel: [], telemetry: [] });
-  updateLocalCache(HISTORY_KEY, snapshotHistory(historySnapshot));
+  if (dashboardSnapshot) {
+    updateLocalCache(DASHBOARD_KEY, dashboardSnapshot.size
+      ? snapshotDashboard(dashboardSnapshot)
+      : { version: 1, fuel: [], telemetry: [] });
+  }
+  if (historySnapshot) updateLocalCache(HISTORY_KEY, snapshotHistory(historySnapshot));
 };
 
 let pendingWrite = Promise.resolve();
