@@ -13,7 +13,8 @@ const pageScripts = {
 try {
   const access = await requireUser();
   if (access) {
-    const pageName = window.location.pathname.split("/").pop() || "index.html";
+    const route = window.location.pathname.split("/").filter(Boolean).pop() || "index";
+    const pageName = route.endsWith(".html") ? route : `${route}.html`;
     if (access.role !== "adm" && ["admin-users.html", "migrar-dados.html"].includes(pageName)) {
       window.location.replace("index.html");
     } else {
