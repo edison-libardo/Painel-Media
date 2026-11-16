@@ -32,6 +32,8 @@ O painel não baixa backups automaticamente; use o botão **Backup** para baixar
 - A página **Histórico** permite salvar snapshots mensais locais, renomeá-los, visualizá-los e editar todas as colunas de um snapshot. As alterações são salvas no próprio histórico sem modificar os dados atuais do painel.
 - A página **Comparativo** compara dois históricos salvos com cartões de KPI por métrica, mostrando o período de referência, o anterior e a variação absoluta; inclui rankings Top 10 responsivos vinculados aos mesmos motoristas do período anterior e distribuição das cinco faixas de notas de telemetria com barras proporcionais.
 
+- Ao ordenar **Média Real**, motoristas agrupados são posicionados pela média total exibida na linha consolidada; os detalhes das placas não alteram a posição do grupo.
+
 ## Estrutura
 
 ```text

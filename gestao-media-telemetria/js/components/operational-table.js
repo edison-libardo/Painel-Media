@@ -14,6 +14,7 @@
       const advancedPanel = document.getElementById("advanced-filters");
       let currentPage = 1;
       const expandedGroups = new Set();
+      const realAverageColumnIndex = 7;
       const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
       const numericValue = (value) => value == null || value === "" || !Number.isFinite(Number(value))
         ? null
@@ -246,6 +247,17 @@
           const matches = groups.get(driverKey) || [];
           matches.push(row);
           groups.set(driverKey, matches);
+        });
+        allRows.forEach((row) => {
+          delete row.cells[realAverageColumnIndex].dataset.sortValue;
+        });
+        groups.forEach((rows) => {
+          if (rows.length < 2) return;
+          const realAverage = summarizeRecords(rows).record.real;
+          const sortValue = realAverage == null ? "-" : String(realAverage);
+          rows.forEach((row) => {
+            row.cells[realAverageColumnIndex].dataset.sortValue = sortValue;
+          });
         });
         const displayRows = [];
         const handledGroups = new Set();
