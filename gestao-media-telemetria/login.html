@@ -7,22 +7,35 @@
   <link rel="stylesheet" href="css/tailwind.css">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/global.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/login.css">
 </head>
-<body class="min-h-screen bg-light-surface text-light-on-surface font-body antialiased">
-  <main class="mx-auto flex min-h-screen max-w-md items-center px-5">
-    <section class="w-full rounded-xl border border-light-outline bg-white p-7 shadow-lg">
-      <p class="text-xs font-bold uppercase tracking-widest text-accent">Libardo Transportes</p>
-      <h1 class="mt-2 text-2xl font-bold text-primary">Acessar o painel</h1>
-      <p class="mt-2 text-sm text-light-on-surface-variant">Entre com o e-mail e a senha fornecidos pelo administrador.</p>
-      <form id="login-form" class="mt-6 space-y-4">
-        <label class="block text-sm font-semibold">E-mail
-          <input id="login-email" type="email" autocomplete="username" required class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
-        </label>
-        <label class="block text-sm font-semibold">Senha
-          <input id="login-password" type="password" autocomplete="current-password" required class="mt-1 w-full rounded-md border border-light-outline px-3 py-2">
-        </label>
-        <p id="login-error" class="text-sm text-rose-700" role="alert" hidden></p>
-        <button id="login-submit" type="submit" class="w-full rounded-md bg-primary px-4 py-2.5 font-semibold text-white hover:bg-slate-700">Entrar</button>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="login-title">
+      <img class="login-brand" src="assets/images/logo_preta.png" alt="Libardo Logística &amp; Transportes">
+      <h1 id="login-title">Conecte</h1>
+      <p class="login-subtitle">Conecte utilizando suas credenciais</p>
+      <form id="login-form" class="login-form">
+        <label for="login-email">E-mail</label>
+        <input id="login-email" type="email" autocomplete="username" placeholder="seu@email.com" required>
+
+        <label for="login-password">Senha</label>
+        <input id="login-password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+
+        <div class="login-options">
+          <label class="remember-option" for="remember-me">
+            <input id="remember-me" type="checkbox">
+            <span>Lembrar-me</span>
+          </label>
+          <a id="forgot-password" href="#recuperar-senha">Recuperar Senha?</a>
+        </div>
+
+        <p id="login-error" class="login-message login-error" role="alert" hidden></p>
+        <p id="login-notice" class="login-message login-notice" role="status" hidden></p>
+        <button id="login-submit" type="submit">Entrar</button>
       </form>
     </section>
   </main>
