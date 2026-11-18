@@ -939,6 +939,67 @@ export const mergeData = (state) => {
     };
     const sourceKey = `${mergedRecord._sourceFuelIndex ?? -1}:${mergedRecord._sourceTelemetryIndex ?? -1}`;
     const overrides = overridesBySource.get(sourceKey);
-    return overrides ? { ...mergedRecord, ...overrides } : mergedRecord;
+    if (!overrides) return mergedRecord;
+    const merged = { ...mergedRecord, ...overrides };
+    const liters = merged.liters;
+    const km = merged.km;
+    const total = merged.total;
+    const factory = merged.factory;
+    const recalculatedReal = Object.prototype.hasOwnProperty.call(overrides, "real")
+      ? overrides.real
+      : km > 0 && liters > 0
+        ? km / liters
+        : merged.real ?? null;
+    const recalculatedUnitPrice = Object.prototype.hasOwnProperty.call(overrides, "unitPrice")
+      ? overrides.unitPrice
+      : liters > 0 && total != null
+        ? total / liters
+        : null;
+    const recalculatedCostPerKm = Object.prototype.hasOwnProperty.call(overrides, "costPerKm")
+      ? overrides.costPerKm
+      : km > 0 && total != null
+        ? total / km
+        : null;
+    const recalcFields = ["liters", "km", "factory", "real", "total", "unitPrice"];
+    const shouldRecalculateSavings = recalcFields.some((field) =>
+      Object.prototype.hasOwnProperty.call(overrides, field));
+    let recalculatedSavingsLiters;
+    if (Object.prototype.hasOwnProperty.call(overrides, "savingsLiters")) {
+      recalculatedSavingsLiters = overrides.savingsLiters;
+    } else if (shouldRecalculateSavings) {
+      recalculatedSavingsLiters = Object.prototype.hasOwnProperty.call(overrides, "real") && liters != null && recalculatedReal != null && factory > 0
+        ? liters * (recalculatedReal / factory - 1)
+        : km > 0 && factory > 0 && liters != null
+          ? km / factory - liters
+          : null;
+    } else {
+      recalculatedSavingsLiters = merged.truckpagSavingsLiters ?? (
+        km > 0 && factory > 0 && liters != null ? km / factory - liters : null
+      );
+    }
+    const recalculatedSavingsMoney = Object.prototype.hasOwnProperty.call(overrides, "savingsMoney")
+      ? overrides.savingsMoney
+      : shouldRecalculateSavings || Object.prototype.hasOwnProperty.call(overrides, "savingsLiters")
+        ? recalculatedSavingsLiters != null && recalculatedUnitPrice != null ? recalculatedSavingsLiters * recalculatedUnitPrice : null
+        : merged.truckpagSavingsMoney ?? (
+          recalculatedSavingsLiters != null && recalculatedUnitPrice != null ? recalculatedSavingsLiters * recalculatedUnitPrice : null
+        );
+    const recalculatedDeviation = recalculatedReal != null && factory > 0 ? (recalculatedReal / factory - 1) * 100 : null;
+    const score = merged.score;
+    const status = score == null
+      ? ""
+      : score <= criticalScoreThreshold
+        ? "Critico"
+        : score < attentionScoreThreshold ? "Atencao" : "Adequado";
+    return {
+      ...merged,
+      real: recalculatedReal,
+      savingsLiters: recalculatedSavingsLiters,
+      savingsMoney: recalculatedSavingsMoney,
+      unitPrice: recalculatedUnitPrice,
+      costPerKm: recalculatedCostPerKm,
+      deviation: recalculatedDeviation,
+      status,
+    };
   });
 };

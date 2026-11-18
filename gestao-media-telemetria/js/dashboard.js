@@ -590,18 +590,7 @@ import {
           if (historyDraftStorageKey) {
             sessionStorage.setItem(historyDraftStorageKey, JSON.stringify(historyDraft));
           }
-          const displayValue = value == null || value === "" ? "—" : String(value);
-          if (field === "driver") {
-            const name = cell.querySelector(".leading-snug");
-            if (name) name.textContent = displayValue;
-            else cell.textContent = displayValue;
-            row.dataset.driver = value || "";
-            cell.dataset.sortValue = value || "";
-          } else {
-            cell.textContent = displayValue;
-          }
-          cell.dataset.editValue = value == null ? "" : String(value);
-          cell.setAttribute("aria-label", `${cell.title.replace("Clique para editar ", "")}: ${displayValue}. Clique para editar.`);
+          render(historyDraft);
           return;
         }
         const state = readState() || { version: 1, fuel: [], telemetry: [] };
